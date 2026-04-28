@@ -30,3 +30,24 @@ def predict(data: InputText):
         "texte": data.texte,
         "prediction": prediction
     }
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}
+
+from pydantic import BaseModel
+
+class NLPInput(BaseModel):
+    rapport_collecte: str
+
+@app.post("/predict")
+def predict_nlp(data: NLPInput):
+    prediction = model_nlp.predict([data.rapport_collecte])[0]
+    proba = model_nlp.predict_proba([data.rapport_collecte])[0]
+
+    return {
+        "categorie": prediction,
+        "confidence": float(max(proba)),
+        "tokens": data.rapport_collecte.lower().split(),
+        "tfidf_keywords": []
+    }
