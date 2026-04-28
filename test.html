@@ -1,0 +1,21 @@
+<textarea id="txt"></textarea>
+<button onclick="send()">Predict</button>
+
+<pre id="res"></pre>
+
+<script>
+async function send() {
+  const texte = document.getElementById("txt").value;
+
+  const response = await fetch("http://127.0.0.1:8000/predict", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ texte: texte })
+  });
+
+  const data = await response.json();
+
+  document.getElementById("res").textContent =
+    JSON.stringify(data, null, 2);
+}
+</script>
