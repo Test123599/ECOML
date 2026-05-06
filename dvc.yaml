@@ -1,0 +1,23 @@
+stages:
+  prepare:
+    cmd: python src/prepare_data.py
+    deps:
+      - src/prepare_data.py
+      - data/raw/dataset_ProjetML_2026.csv
+    outs:
+      - data/processed/dataset_clean.csv
+
+  train:
+    cmd: python src/train.py
+    deps:
+      - src/train.py
+      - data/processed/dataset_clean.csv
+    outs:
+      - models/best_model.pkl
+
+  evaluate:
+    cmd: python src/evaluate.py
+    deps:
+      - src/evaluate.py
+      - data/processed/dataset_clean.csv
+      - models/best_model.pkl
