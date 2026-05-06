@@ -1,1 +1,8 @@
-/model_nlp.pkl
+venv/
+__pycache__/
+.ipynb_checkpoints/
+models/*.pkl
+data/raw/*.csv
+data/processed/*.csv
+mlruns/
+.env

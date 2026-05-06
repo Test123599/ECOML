@@ -1,5 +1,0 @@
-outs:
-- md5: 66d2603ee6dec46de7f8d4fe9d87ca96
-  size: 44069
-  hash: md5
-  path: modele_nlp_tfidf_linearsvc.pkl

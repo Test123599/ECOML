@@ -1,5 +1,0 @@
-outs:
-- md5: 76dd1062baf9fd596c9a4071b7f384a0
-  size: 52985
-  hash: md5
-  path: model_nlp.pkl

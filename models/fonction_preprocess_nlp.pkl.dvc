@@ -1,5 +1,0 @@
-outs:
-- md5: 27eb6871dc09f93b472e218a0eb0395e
-  size: 42
-  hash: md5
-  path: fonction_preprocess_nlp.pkl
