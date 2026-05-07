@@ -1,7 +1,7 @@
 # Eco-Smart Classifier
 
 ## Description
-
+oki oki
 Ce projet consiste à développer un pipeline complet de Machine Learning permettant de classifier des déchets et d’estimer leur valeur de revente.
 
 Le projet couvre :
