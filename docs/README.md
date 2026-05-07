@@ -1,4 +1,4 @@
-#  Eco-Smart Classifier
+# Eco-Smart Classifier
 
 ## Description
 
@@ -6,185 +6,348 @@ Ce projet consiste à développer un pipeline complet de Machine Learning permet
 
 Le projet couvre :
 
-* Le nettoyage et prétraitement des données
-* L’analyse non supervisée (clustering)
-* L’extraction d’informations à partir de texte (NLP)
-* La préparation pour des modèles ML
+- Le nettoyage et prétraitement des données
+- L’analyse non supervisée (clustering)
+- L’extraction d’informations à partir de texte (NLP)
+- La préparation pour des modèles ML
+- Le déploiement MLOps et monitoring de production
 
 ---
 
-## Dataset
+# Structure du Projet
+
+ECOML/
+
+├── api/
+│ └── main.py
+│
+├── data/
+│ ├── raw/
+│ │ └── dataset_ProjetML_2026.csv
+│ └── processed/
+│ └── dataset_clean.csv
+│
+├── models/
+│ ├── modele_classification.pkl
+│ ├── modele_regression.pkl
+│ └── modele_nlp_tfidf_linearsvc1.pkl
+│
+├── src/
+│ ├── prepare_data.py
+│ ├── train.py
+│ ├── evaluate.py
+│ └── monitor.py
+│
+├── tests/
+│ ├── test_api.py
+│ ├── test_data.py
+│ ├── test_model.py
+│ └── test_nlp.py
+│
+├── dvc.yaml
+├── Dockerfile
+├── prometheus.yml
+├── requirements.txt
+└── README.md
+
+---
+
+# Dataset
 
 Le dataset contient 9 colonnes :
 
-* **Poids**
-* **Volume**
-* **Conductivite**
-* **Opacite**
-* **Rigidite**
-* **Prix_Revente**
-* **Source** (catégorielle)
-* **Rapport_Collecte** (texte)
-* **Categorie** (target)
+- Poids
+- Volume
+- Conductivite
+- Opacite
+- Rigidite
+- Prix_Revente
+- Source (catégorielle)
+- Rapport_Collecte (texte)
+- Categorie (target)
 
-### Problèmes détectés :
+## Problèmes détectés
 
-* Valeurs manquantes (NaN)
-* Outliers
-* Données textuelles non structurées
+- Valeurs manquantes (NaN)
+- Outliers
+- Données textuelles non structurées
 
 ---
 
-## Prétraitement des données
+# Prétraitement des données
 
 Les étapes réalisées :
 
-* Suppression des doublons
-* Gestion des valeurs manquantes :
-
-  * Remplacement par la médiane
-  * Utilisation du texte (NLP) pour compléter certaines valeurs
-* Traitement des outliers
-* Normalisation avec **StandardScaler**
-* Encodage des variables catégorielles
+- Suppression des doublons
+- Gestion des valeurs manquantes
+- Remplacement par la médiane
+- Utilisation du texte (NLP) pour compléter certaines valeurs
+- Traitement des outliers
+- Normalisation avec StandardScaler
+- Encodage des variables catégorielles
 
 ---
-## ⚙️ Modules
 
-### 🧹 Module 1 : Data Engineering
+# Modules
+
+## Module 1 : Data Engineering
+
 - Nettoyage des données
-- Gestion des NaN (médiane, KNN Imputer, Iterative Imputer)
+- Gestion des NaN
+- KNN Imputer
+- Iterative Imputer
 - Traitement des outliers
-- Normalisation des données
+- Normalisation
 
-### 🤖 Module 2 : Machine Learning Supervisé
-- Classification de la catégorie
-- Régression du prix de revente
+---
 
-### 🔍 Module 3 : Clustering
-- KMeans pour segmentation des données
-- Méthode du coude (Elbow Method)
-- Visualisation avec PCA
-- Évaluation avec Silhouette Score
+## Module 2 : Machine Learning Supervisé
 
-### 🧠 Module 4 : NLP
-- Nettoyage du texte
-- Extraction d’informations depuis Rapport_Collecte
-- Vectorisation (TF-IDF)
+### Classification
 
-### 🔗 Module 5 : Pipeline Multimodal
-- Fusion des données numériques et textuelles
+Objectif :
 
-### 🚀 Module 6 : MLOps
-- Versioning avec DVC
-- Tracking avec MLflow
-- API avec FastAPI
+Prédire la catégorie du déchet.
 
+Modèles testés :
 
-## Clustering (Module 3)
+- RandomForest
+- GradientBoosting
+- LogisticRegression
+- SVM
+- KNN
+
+### Régression
+
+Objectif :
+
+Prédire le prix de revente.
+
+Modèles testés :
+
+- CatBoost
+- XGBoost
+- RandomForestRegressor
+- GradientBoostingRegressor
+- KNN Regressor
+
+---
+
+## Module 3 : Clustering
 
 ### Objectif
 
-Segmenter les données sans utiliser la variable cible (`Categorie`).
-
----
+Segmenter les données sans utiliser la variable cible (Categorie).
 
 ### Étapes
 
 1. Sélection des variables numériques :
+   - Poids
+   - Volume
+   - Conductivite
+   - Opacite
+   - Rigidite
 
-   * Poids
-   * Volume
-   * Conductivite
-   * Opacite
-   * Rigidite
+2. Gestion des valeurs manquantes
 
-2. Gestion des valeurs manquantes :
-
-   * Remplacement par la médiane
-
-3. Normalisation :
-
-   * StandardScaler
+3. Normalisation avec StandardScaler
 
 4. Détermination du nombre optimal de clusters :
-
-   * Méthode du coude (Elbow Method)
+   - Méthode du coude
 
 5. Application de KMeans
 
 6. Évaluation :
-
-   * Silhouette Score
+   - Silhouette Score
 
 7. Visualisation :
+   - PCA 2D
 
-   * Réduction de dimension avec PCA
+### Résultats
 
----
+- Nombre de clusters : 3
+- Algorithme : KMeans
+- Visualisation : PCA
 
-###  Résultats
+### Interprétation des clusters
 
-* Nombre de clusters choisi : **3**
-* Méthode utilisée : **KMeans**
-* Visualisation : **PCA (2D)**
-
----
-
-###  Interprétation des clusters
-
-* **Cluster 0** : matériaux lourds (ex: verre)
-* **Cluster 1** : matériaux légers (ex: plastique)
-* **Cluster 2** : matériaux intermédiaires (ex: papier)
+- Cluster 0 : matériaux lourds
+- Cluster 1 : matériaux légers
+- Cluster 2 : matériaux intermédiaires
 
 ---
 
-##  NLP (Rapport_Collecte)
+# Module 4 : NLP
 
-Le texte a été exploité pour :
+Le texte de Rapport_Collecte a été utilisé pour :
 
-* Extraire des informations (volume, type de déchet)
-* Compléter certaines valeurs manquantes
-* Nettoyer le texte (minuscule, suppression ponctuation)
+- Extraire des informations utiles
+- Nettoyer les descriptions
+- Compléter certaines valeurs manquantes
+- Construire un pipeline NLP
+
+## Étapes NLP
+
+- Lowercase
+- Suppression ponctuation
+- Nettoyage Regex
+- TF-IDF Vectorization
+- Classification NLP
 
 ---
 
-## Technologies utilisées
+# Module 5 : Pipeline Multimodal
 
-* Python
-* Pandas / NumPy
-* Scikit-learn
-* Matplotlib / Seaborn
-* Regex (NLP simple)
+Fusion des données :
+
+- numériques
+- textuelles
+
+Techniques utilisées :
+
+- TF-IDF
+- hstack
+- Pipeline sklearn
+- Fusion sparse multimodale
 
 ---
 
-## Exécution
+# Module 6 : MLOps
 
-```bash
+## Fonctionnalités réalisées
+
+- Versionnement Git + DVC
+- Pipeline DVC automatisé
+- Tracking MLflow
+- API REST FastAPI
+- Dockerisation
+- Tests automatisés
+- Monitoring drift
+- Prometheus
+- Grafana
+- GitHub Actions
+
+---
+
+# Rejouer le Pipeline en 3 Commandes
+
+## 1. Installer les dépendances
+
+
 pip install -r requirements.txt
-python main.py
-```
 
-Ou via Jupyter Notebook :
+## 2. Exécuter le pipeline DVC
 
-```bash
-jupyter notebook
-```
+dvc repro
 
----
+## 3.Lancer l’API FastAPI
 
-## Résultats globaux
+uvicorn api.main:app --reload
 
-* Clustering cohérent avec les caractéristiques physiques des matériaux
-* Amélioration de la qualité des données grâce au NLP
-* Pipeline prêt pour extension vers classification
+# Tests Automatisés
 
----
+pytest --cov=src --cov=api tests/
 
-## Auteur
+# API REST FastAPI
 
-* **Chayma et Emna **
-* DSIR
+| Endpoint                | Description           |
+| ----------------------- | --------------------- |
+| /                       | Test API              |
+| /predict/classification | Classification        |
+| /predict/regression     | Régression            |
+| /predict/nlp            | NLP                   |
+| /metrics                | Monitoring Prometheus |
 
----
+# Docker
+
+- Construire image Docker
+docker build -t eco-smart-api .
+
+-Lancer le container
+
+docker run -p 8000:8000 eco-smart-api
+
+# Monitoring Drift — Evidently AI
+
+python src/monitor.py
+
+Le rapport HTML permet de visualiser :
+
+les colonnes driftées
+les distributions statistiques
+les scores de drift
+les comparaisons référence / production
+
+# Prometheus + Grafana
+
+Le projet utilise :
+
+Prometheus pour collecter les métriques
+Grafana pour afficher des dashboards temps réel
+Endpoint Prometheus
+
+http://127.0.0.1:8000/metrics
+
+Les métriques surveillées :
+
+nombre de requêtes API
+activité du système
+monitoring temps réel
+
+Grafana permet ensuite de visualiser :
+
+dashboards interactifs
+courbes temps réel
+observabilité du système
+
+# GitHub Actions — CI/CD
+
+Le pipeline CI/CD exécute automatiquement :
+
+Black
+isort
+flake8
+Pytest
+Coverage
+Docker Build
+
+à chaque push GitHub.
+
+L’intégration continue permet :
+
+la validation automatique du code
+l’exécution des tests
+la détection rapide des erreurs
+l’automatisation du déploiement
+
+# Technologies utilisées
+
+Python
+Pandas
+NumPy
+Scikit-learn
+MLflow
+DVC
+FastAPI
+Docker
+Pytest
+Evidently AI
+Prometheus
+Grafana
+GitHub Actions
+Matplotlib
+Regex
+NLP
+
+# Conclusion
+
+Ce projet met en œuvre une démarche MLOps complète permettant :
+
+la reproductibilité des expériences
+l’automatisation du pipeline
+le suivi des modèles
+le monitoring de production
+le déploiement via API REST
+et l’observabilité temps réel
+
+L’intégration de Git, DVC, MLflow, FastAPI, Docker, Evidently AI, Prometheus et Grafana rapproche le projet d’une architecture Machine Learning de production industrielle.
