@@ -9,8 +9,21 @@ from fastapi.responses import Response
 from pydantic import BaseModel
 from prometheus_client import Counter, generate_latest
 
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+from sklearn.cluster import KMeans
+
 app = FastAPI(title="Eco-Smart Classifier API")
 
+from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 REQUEST_COUNT = Counter(
     "api_requests_total",
     "Nombre total de requêtes API",
@@ -18,6 +31,7 @@ REQUEST_COUNT = Counter(
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MODELS_DIR = os.path.join(BASE_DIR, "models")
+DATA_PATH = os.path.join(BASE_DIR, "data", "processed", "dataset_clean.csv")
 
 CLASS_MODEL_PATH = os.path.join(MODELS_DIR, "modele_classification.pkl")
 REG_MODEL_PATH = os.path.join(MODELS_DIR, "modele_regression.pkl")
@@ -125,29 +139,143 @@ def predict_regression(data: InputManuel):
         "categorie_utilisee": str(df["Categorie"].iloc[0]),
         "prix_revente_predit": round(float(prix), 3),
     }
+def clean_text(text):
+    import re
 
+    text = str(text).lower()
+    text = re.sub(r"[^a-zàâçéèêëîïôûùüÿñæœ0-9\s]", " ", text)
+    text = re.sub(r"\s+", " ", text).strip()
+    return text
+
+
+def keyword_nlp_prediction(text):
+    text = clean_text(text)
+
+    plastique_words = [
+        "plastique", "polymere", "polymère", "pet", "pvc",
+        "bouteille legere", "bouteille légère", "compressible",
+        "souple", "emballage alimentaire", "produit cosmetique",
+        "produit cosmétique", "supermarche", "supermarché"
+    ]
+
+    verre_words = [
+        "verre", "bocal", "vitre", "fragile", "transparent lourd",
+        "bouteille cassee", "bouteille cassée", "recipient lourd",
+        "récipient lourd", "confiture","cassante"
+    ]
+
+    metal_words = [
+        "metal", "métal", "metallique", "métallique",
+        "aluminium", "canette", "conserve", "conducteur",
+        "objet lourd conducteur", "emballage industriel",
+        "oxyde", "oxydé"
+    ]
+
+    papier_words = [
+        "papier", "carton", "feuille", "journal", "livre",
+        "imprime", "imprimé", "bureau", "fibreux",
+        "administration", "support leger", "support léger",
+        "lecture", "colis"
+    ]
+
+    if any(w in text for w in metal_words):
+        return "Métal"
+
+    if any(w in text for w in papier_words):
+        return "Papier"
+
+    if any(w in text for w in verre_words):
+        return "Verre"
+
+    if any(w in text for w in plastique_words):
+        return "Plastique"
+
+    return None
 
 @app.post("/predict/nlp")
 def predict_nlp(data: InputNLP):
     REQUEST_COUNT.inc()
 
-    prediction = modele_nlp.predict([data.texte])[0]
+    texte_clean = clean_text(data.texte)
+
+    prediction_keywords = keyword_nlp_prediction(texte_clean)
+
+    if prediction_keywords is not None:
+        prediction = prediction_keywords
+        methode = "keywords"
+    else:
+        prediction = modele_nlp.predict([texte_clean])[0]
+        methode = "modele_nlp"
 
     log_data = {
         "timestamp": datetime.now().isoformat(),
         "endpoint": "/predict/nlp",
         "texte": data.texte,
+        "texte_clean": texte_clean,
         "prediction": str(prediction),
+        "methode": methode,
     }
 
     write_log(log_data)
 
     return {
         "texte": data.texte,
+        "texte_clean": texte_clean,
         "categorie_predite": str(prediction),
+        "methode": methode,
     }
-
-
 @app.get("/metrics")
 def metrics():
     return Response(generate_latest(), media_type="text/plain")
+
+@app.get("/dashboard/clusters")
+def dashboard_clusters():
+    REQUEST_COUNT.inc()
+
+    df = pd.read_csv(DATA_PATH)
+
+    numeric_cols = [
+        "Poids",
+        "Volume",
+        "Conductivite",
+        "Opacite",
+        "Rigidite",
+    ]
+
+    X = df[numeric_cols].copy()
+    X = X.fillna(X.median())
+
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(X)
+
+    kmeans = KMeans(n_clusters=6, random_state=42, n_init=10)
+    clusters = kmeans.fit_predict(X_scaled)
+
+    pca = PCA(n_components=2)
+    X_pca = pca.fit_transform(X_scaled)
+
+    result = []
+
+    for i in range(len(df)):
+        result.append(
+            {
+                "id": int(i),
+                "Poids": float(df.iloc[i]["Poids"]),
+                "Volume": float(df.iloc[i]["Volume"]),
+                "Conductivite": float(df.iloc[i]["Conductivite"]),
+                "Opacite": float(df.iloc[i]["Opacite"]),
+                "Rigidite": float(df.iloc[i]["Rigidite"]),
+                "Source": str(df.iloc[i]["Source"]),
+                "Categorie": str(df.iloc[i]["Categorie"]),
+                "Prix_Revente": float(df.iloc[i]["Prix_Revente"]),
+                "cluster": int(clusters[i]),
+                "pca1": float(X_pca[i, 0]),
+                "pca2": float(X_pca[i, 1]),
+            }
+        )
+
+    return {
+        "message": "Données PCA et clusters générées avec succès",
+        "n_rows": len(result),
+        "data": result,
+    }

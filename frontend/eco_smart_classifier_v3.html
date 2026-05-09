@@ -1,0 +1,665 @@
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--eco-green:#1D9E75;--eco-green-light:#E1F5EE;--eco-green-dark:#085041;--eco-teal:#0F6E56}
+.app{font-family:'DM Sans',sans-serif;background:var(--color-background-tertiary);min-height:600px;border-radius:var(--border-radius-lg);overflow:hidden}
+.header{background:var(--eco-green-dark);padding:1rem 1.5rem 0}
+.header-top{display:flex;align-items:center;gap:10px;margin-bottom:1rem}
+.logo{width:32px;height:32px;background:var(--eco-green);border-radius:8px;display:flex;align-items:center;justify-content:center}
+.header-top h1{font-family:'Space Mono',monospace;font-size:15px;font-weight:700;color:#9FE1CB;letter-spacing:-0.5px}
+.header-top .badge{font-size:11px;color:rgba(255,255,255,.45);background:rgba(255,255,255,.08);padding:2px 8px;border-radius:20px;margin-left:auto}
+.tabs{display:flex;gap:2px}
+.tab{padding:8px 16px;font-size:13px;font-weight:500;color:rgba(255,255,255,.5);cursor:pointer;border-radius:8px 8px 0 0;transition:all .15s;display:flex;align-items:center;gap:6px;border:none;background:transparent}
+.tab:hover{color:rgba(255,255,255,.8);background:rgba(255,255,255,.06)}
+.tab.active{color:var(--eco-green-dark);background:var(--color-background-tertiary);font-weight:600}
+.content{padding:1.5rem}
+.panel{display:none}.panel.active{display:block}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.25rem}
+.stat-card{background:var(--color-background-primary);border:.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:12px 14px}
+.stat-label{font-size:11px;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.stat-value{font-size:22px;font-weight:600;color:var(--color-text-primary);font-family:'Space Mono',monospace}
+.stat-sub{font-size:11px;color:var(--eco-green);margin-top:2px}
+.charts-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.chart-card{background:var(--color-background-primary);border:.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem}
+.chart-title{font-size:12px;font-weight:500;color:var(--color-text-secondary);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px}
+.pca-wrap{position:relative;height:200px}
+.dist-bar-item{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:12px}
+.dist-label{color:var(--color-text-secondary);min-width:72px}
+.dist-track{flex:1;height:6px;background:var(--color-background-secondary);border-radius:3px;overflow:hidden}
+.dist-fill{height:100%;border-radius:3px}
+.dist-pct{font-size:11px;color:var(--color-text-tertiary);min-width:32px;text-align:right}
+.pred-layout{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem}
+.sliders-card{background:var(--color-background-primary);border:.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem 1.25rem}
+.slider-item{margin-bottom:16px}
+.slider-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}
+.slider-name{font-size:13px;color:var(--color-text-secondary);font-weight:500}
+.slider-val{font-size:13px;color:var(--color-text-primary);font-family:'Space Mono',monospace;font-weight:700}
+.slider-bounds{display:flex;justify-content:space-between;font-size:10px;color:var(--color-text-tertiary);margin-top:2px}
+input[type=range]{width:100%;accent-color:var(--eco-green)}
+.source-select label{font-size:12px;color:var(--color-text-tertiary);display:block;margin-bottom:4px}
+select{width:100%;padding:6px 10px;font-size:13px;border-radius:var(--border-radius-md);border:.5px solid var(--color-border-secondary);background:var(--color-background-secondary);color:var(--color-text-primary);font-family:'DM Sans',sans-serif}
+.result-panel{display:flex;flex-direction:column;gap:10px}
+.result-card{background:var(--color-background-primary);border:.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem 1.25rem;flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}
+.result-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;font-size:13px;font-weight:600;margin-bottom:8px}
+.category-dot{width:8px;height:8px;border-radius:50%}
+.result-cat-label{font-size:11px;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.result-cat-name{font-size:24px;font-weight:600;color:var(--color-text-primary);font-family:'Space Mono',monospace}
+.result-price-label{font-size:11px;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.result-price{font-size:32px;font-weight:700;font-family:'Space Mono',monospace;color:var(--eco-green)}
+.api-note{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--color-text-tertiary);margin-top:6px}
+.status-dot{width:6px;height:6px;border-radius:50%;background:#9FE1CB;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.demo-banner{background:var(--color-background-secondary);border:.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:8px 12px;margin-bottom:1rem;font-size:12px;color:var(--color-text-secondary);display:flex;align-items:center;gap:6px}
+.nlp-layout{display:grid;grid-template-columns:1fr;gap:1.25rem;max-width:600px;margin:0 auto}
+.nlp-card{background:var(--color-background-primary);border:.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1.25rem}
+.nlp-textarea{width:100%;padding:10px 12px;font-size:13px;border-radius:var(--border-radius-md);border:.5px solid var(--color-border-secondary);background:var(--color-background-secondary);color:var(--color-text-primary);font-family:'DM Sans',sans-serif;resize:none;line-height:1.6;min-height:90px}
+.nlp-textarea:focus{outline:none;border-color:var(--eco-green);box-shadow:0 0 0 2px rgba(29,158,117,.12)}
+.nlp-btn{margin-top:10px;width:100%;padding:9px 16px;font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;border-radius:var(--border-radius-md);border:none;background:var(--eco-green);color:white;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .15s}
+.nlp-btn:hover{background:var(--eco-teal)}
+.nlp-btn:disabled{opacity:.5;cursor:not-allowed}
+.examples-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.example-chip{font-size:11px;padding:4px 10px;border-radius:20px;background:var(--eco-green-light);color:var(--eco-teal);cursor:pointer;border:.5px solid #5DCAA5;transition:all .12s;font-family:'DM Sans',sans-serif}
+.example-chip:hover{background:#9FE1CB}
+.nlp-result{border-radius:var(--border-radius-lg);padding:1.25rem;display:none;flex-direction:column;gap:8px;border:.5px solid var(--color-border-tertiary);background:var(--color-background-primary)}
+.nlp-result.visible{display:flex}
+.nlp-spinner{display:none;text-align:center;padding:1rem;font-size:12px;color:var(--color-text-tertiary)}
+.nlp-spinner.active{display:block}
+.confidence-bar{height:4px;background:var(--color-background-secondary);border-radius:2px;overflow:hidden;margin-top:4px}
+.confidence-fill{height:100%;background:var(--eco-green);border-radius:2px;transition:width .5s ease}
+.history-item{padding:8px 0;border-bottom:.5px solid var(--color-border-tertiary);display:flex;align-items:center;justify-content:space-between;font-size:12px}
+.history-text{color:var(--color-text-secondary);max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.history-tag{font-size:11px;padding:2px 8px;border-radius:10px;font-weight:500;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+
+<div class="app" role="main">
+<h2 class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)">Eco-Smart Classifier</h2>
+<div class="header">
+  <div class="header-top">
+    <div class="logo"><i class="ti ti-recycle" style="font-size:18px;color:#9FE1CB;" aria-hidden="true"></i></div>
+    <h1>Eco-Smart Classifier</h1>
+    <span class="badge">v1.0 · FastAPI</span>
+  </div>
+  <div class="tabs" role="tablist">
+    <button class="tab active" role="tab" aria-selected="true" onclick="switchTab('dashboard')"><i class="ti ti-chart-scatter" aria-hidden="true"></i> Dashboard Data</button>
+    <button class="tab" role="tab" aria-selected="false" onclick="switchTab('prediction')"><i class="ti ti-adjustments-horizontal" aria-hidden="true"></i> Prédiction Manuelle</button>
+    <button class="tab" role="tab" aria-selected="false" onclick="switchTab('nlp')"><i class="ti ti-message-chatbot" aria-hidden="true"></i> Assistant NLP</button>
+  </div>
+</div>
+
+<div class="content">
+
+<!-- DASHBOARD -->
+<div class="panel active" id="panel-dashboard">
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-label">Échantillons</div><div class="stat-value">10 500</div><div class="stat-sub"><i class="ti ti-trending-up" style="font-size:12px" aria-hidden="true"></i> dataset total</div></div>
+    <div class="stat-card"><div class="stat-label">Catégories</div><div class="stat-value">4</div><div class="stat-sub">classes actives</div></div>
+    <div class="stat-card"><div class="stat-label">Précision Clf</div><div class="stat-value">94.2%</div><div class="stat-sub"><i class="ti ti-check" style="font-size:12px" aria-hidden="true"></i> test set</div></div>
+    <div class="stat-card"><div class="stat-label">RMSE Reg</div><div class="stat-value">0.031</div><div class="stat-sub">prix revente</div></div>
+  </div>
+  <div class="charts-row">
+    <div class="chart-card">
+      <div class="chart-title">Projection PCA — clusters</div>
+      <div class="pca-wrap"><canvas id="pcaChart" role="img" aria-label="Scatter PCA 2D des clusters"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Distribution des catégories</div>
+      <div id="distBars"></div>
+      <div style="margin-top:14px">
+        <div class="chart-title" style="margin-bottom:8px">Corrélation features</div>
+        <div style="position:relative;height:120px"><canvas id="radarChart" role="img" aria-label="Radar corrélations"></canvas></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PREDICTION -->
+<div class="panel" id="panel-prediction">
+  <div class="demo-banner">
+    <i class="ti ti-info-circle" aria-hidden="true"></i>
+    Connecté à FastAPI — lance <code>uvicorn src.api:app --reload</code> puis teste les prédictions.
+  </div>
+  <div class="pred-layout">
+    <div class="sliders-card">
+      <div style="font-size:13px;font-weight:500;color:var(--color-text-secondary);margin-bottom:14px;text-transform:uppercase;letter-spacing:.5px">Paramètres physiques</div>
+
+      <!-- Poids : 0–500 g, valeur brute entière -->
+      <div class="slider-item">
+        <div class="slider-row">
+          <span class="slider-name">Poids</span>
+          <span class="slider-val"><span id="val-Poids">39</span> <span style="font-size:10px;font-weight:400;color:var(--color-text-tertiary)">g</span></span>
+        </div>
+        <input type="range" min="0" max="500" value="39" step="1"
+          oninput="updateSlider('Poids', +this.value, this.value)">
+        <div class="slider-bounds"><span>0 g</span><span>500 g</span></div>
+      </div>
+
+      <!-- Volume : 0–554 cm³, valeur brute entière -->
+      <div class="slider-item">
+        <div class="slider-row">
+          <span class="slider-name">Volume</span>
+          <span class="slider-val"><span id="val-Volume">88</span> <span style="font-size:10px;font-weight:400;color:var(--color-text-tertiary)">cm³</span></span>
+        </div>
+        <input type="range" min="0" max="554" value="88" step="1"
+          oninput="updateSlider('Volume', +this.value, this.value)">
+        <div class="slider-bounds"><span>0 cm³</span><span>554 cm³</span></div>
+      </div>
+
+      <!-- Conductivité : 0.000–1.000, 3 décimales — valeur brute NON divisée -->
+      <div class="slider-item">
+        <div class="slider-row">
+          <span class="slider-name">Conductivité</span>
+          <span class="slider-val"><span id="val-Conductivite">0.000</span></span>
+        </div>
+        <input type="range" min="0" max="1000" value="0" step="1"
+          oninput="updateSlider('Conductivite', this.value/1000, (this.value/1000).toFixed(3))">
+        <div class="slider-bounds"><span>0.000</span><span>1.000</span></div>
+      </div>
+
+      <!-- Opacité : 0.00–55.00, valeur brute — PAS divisée par 100 -->
+      <div class="slider-item">
+        <div class="slider-row">
+          <span class="slider-name">Opacité</span>
+          <span class="slider-val"><span id="val-Opacite">0.55</span></span>
+        </div>
+        <input type="range" min="0" max="5500" value="55" step="1"
+          oninput="updateSlider('Opacite', this.value/100, (this.value/100).toFixed(2))">
+        <div class="slider-bounds"><span>0.00</span><span>55.00</span></div>
+      </div>
+
+      <!-- Rigidité : entier 1–10 — valeur brute entière -->
+      <div class="slider-item">
+        <div class="slider-row">
+          <span class="slider-name">Rigidité</span>
+          <span class="slider-val"><span id="val-Rigidite">5</span> <span style="font-size:10px;font-weight:400;color:var(--color-text-tertiary)">/10</span></span>
+        </div>
+        <input type="range" min="1" max="10" value="5" step="1"
+          oninput="updateSlider('Rigidite', +this.value, this.value)">
+        <div class="slider-bounds"><span>1</span><span>10</span></div>
+      </div>
+
+      <div class="source-select" style="margin-top:6px">
+        <label for="sourceSelect">Source matière</label>
+        <select id="sourceSelect" onchange="triggerPrediction()">
+          <option value="Usine_A">Usine A</option>
+          <option value="Usine_B">Usine B</option>
+          <option value="Centre_Tri">Centre de Tri</option>
+          <option value="Collecte_Citoyenne">Collecte Citoyenne</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="result-panel">
+      <div class="result-card" id="clf-card" style="background:var(--eco-green-light);border-color:#9FE1CB">
+        <div class="result-cat-label">Catégorie prédite</div>
+        <div class="result-cat-name" id="pred-categorie">—</div>
+        <div style="margin-top:8px">
+          <div id="cat-badge" class="result-badge" style="background:#9FE1CB;color:var(--eco-green-dark)">
+            <span class="category-dot" style="background:var(--eco-green-dark)"></span>
+            <span id="cat-badge-text">Calcul...</span>
+          </div>
+        </div>
+        <div class="api-note"><span class="status-dot"></span><span id="clf-status">POST /predict/classification</span></div>
+      </div>
+
+      <div class="result-card">
+        <div class="result-price-label">Prix revente prédit</div>
+        <div class="result-price" id="pred-price">—</div>
+        <div style="font-size:11px;color:var(--color-text-tertiary);margin-top:4px">médiane dataset : 4.14 Dt</div>
+        <div class="api-note"><span class="status-dot"></span><span id="reg-status">POST /predict/regression</span></div>
+      </div>
+
+      <!-- Payload affiché — exactement ce qui sera envoyé à l'API -->
+      <div style="background:var(--color-background-primary);border:.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:12px 14px">
+        <div class="stat-label" style="margin-bottom:6px">Payload envoyé</div>
+        <pre id="payload-display" style="font-size:10px;font-family:'Space Mono',monospace;color:var(--eco-green);line-height:1.5;overflow:auto;max-height:120px">{}</pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- NLP -->
+<div class="panel" id="panel-nlp">
+  <div class="nlp-layout">
+    <div class="nlp-card">
+      <div style="font-size:13px;font-weight:500;color:var(--color-text-secondary);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px">Décrire le matériau</div>
+      <textarea class="nlp-textarea" id="nlpInput" placeholder="Ex: Lot de papier récupéré à l'Usine A, volume 88 cm³, poids faible..." rows="4"></textarea>
+      <button class="nlp-btn" id="nlpBtn" onclick="runNLP()">
+        <i class="ti ti-sparkles" aria-hidden="true"></i> Classifier via NLP
+      </button>
+      <div class="examples-row">
+        <span style="font-size:11px;color:var(--color-text-tertiary);width:100%;margin-bottom:2px">Exemples rapides :</span>
+        <button class="example-chip" onclick="setExample(this)">Objet conducteur, lourd et opaque</button>
+        <button class="example-chip" onclick="setExample(this)">Bris de verre, contenants fragiles</button>
+        <button class="example-chip" onclick="setExample(this)">Feuilles et cartons centre de tri</button>
+        <button class="example-chip" onclick="setExample(this)">Canette aluminium collecte citoyenne</button>
+      </div>
+    </div>
+    <div class="nlp-spinner" id="nlpSpinner">
+      <i class="ti ti-loader-2" style="font-size:20px;color:var(--eco-green);animation:spin 1s linear infinite" aria-hidden="true"></i>
+      <div style="margin-top:6px">Analyse en cours...</div>
+    </div>
+    <div class="nlp-result" id="nlpResult">
+      <div style="font-size:11px;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:.5px">Résultat NLP</div>
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div id="nlp-cat-name" style="font-size:24px;font-weight:600;font-family:'Space Mono',monospace;color:var(--color-text-primary)">—</div>
+        <div id="nlp-cat-badge" class="result-badge" style="font-size:12px;background:var(--eco-green-light);color:var(--eco-teal)">—</div>
+      </div>
+      <div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--color-text-tertiary);margin-bottom:4px">
+          <span>Confiance estimée</span><span id="nlp-conf-pct">—</span>
+        </div>
+        <div class="confidence-bar"><div class="confidence-fill" id="nlp-conf-bar" style="width:0%"></div></div>
+      </div>
+      <div style="font-size:11px;color:var(--color-text-tertiary);padding:8px 10px;background:var(--color-background-secondary);border-radius:var(--border-radius-md)">
+        <i class="ti ti-quote" style="font-size:13px" aria-hidden="true"></i>
+        <span id="nlp-texte-echo" style="font-style:italic;margin-left:4px">—</span>
+      </div>
+      <div style="font-size:11px;color:var(--color-text-tertiary)"><span id="nlp-methode-echo">méthode : —</span></div>
+    </div>
+    <div class="nlp-card" id="historyCard" style="display:none">
+      <div style="font-size:12px;font-weight:500;color:var(--color-text-secondary);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">
+        Historique <span id="histCount" style="font-weight:400;color:var(--color-text-tertiary)">(0)</span>
+      </div>
+      <div id="historyList"></div>
+    </div>
+  </div>
+</div>
+
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+/* =======================================================
+   CONFIG API
+   Backend attendu : http://127.0.0.1:8000
+   Endpoints utilisés :
+   - GET  /dashboard/clusters
+   - POST /predict/classification
+   - POST /predict/regression
+   - POST /predict/nlp
+======================================================= */
+const API_BASE = "http://127.0.0.1:8000";
+const USE_REAL_API = true;
+
+const CAT_COLORS = {
+  "Plastique": {bg:"#E6F1FB",border:"#85B7EB",dot:"#185FA5",text:"#0C447C"},
+  "Métal":     {bg:"#FAEEDA",border:"#EF9F27",dot:"#BA7517",text:"#633806"},
+  "Verre":     {bg:"#E1F5EE",border:"#5DCAA5",dot:"#0F6E56",text:"#085041"},
+  "Papier":    {bg:"#FCEBEB",border:"#F09595",dot:"#A32D2D",text:"#501313"},
+  "Inconnue":  {bg:"#F1F1F1",border:"#BDBDBD",dot:"#777",text:"#333"},
+};
+
+const CLUSTER_COLORS = ["#1D9E75", "#185FA5", "#BA7517", "#A32D2D", "#7A4DD8", "#E07A5F", "#2A9D8F", "#264653"];
+let pcaChart = null;
+let radarChart = null;
+let predTimeout = null;
+const nlpHistory = [];
+
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach((t,i) => {
+    const p=['dashboard','prediction','nlp'];
+    t.classList.toggle('active',p[i]===name);
+    t.setAttribute('aria-selected',p[i]===name);
+  });
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+}
+
+async function apiRequest(endpoint, {method='GET', body=null} = {}) {
+  const options = { method, headers: {'Content-Type':'application/json'} };
+  if (body !== null) options.body = JSON.stringify(body);
+
+  const res = await fetch(API_BASE + endpoint, options);
+  const text = await res.text();
+  let data = {};
+  try { data = text ? JSON.parse(text) : {}; } catch (_) { data = {raw:text}; }
+
+  if (!res.ok) {
+    const detail = data.detail || data.message || res.statusText || 'Erreur API';
+    throw new Error(`HTTP ${res.status} — ${detail}`);
+  }
+  return data;
+}
+
+function postAPI(endpoint, payload) {
+  return apiRequest(endpoint, {method:'POST', body:payload});
+}
+
+function setBadgeStatus(ok) {
+  const badge = document.querySelector('.header-top .badge');
+  if (!badge) return;
+  badge.textContent = ok ? 'v1.0 · FastAPI connecté' : 'v1.0 · API non connectée';
+}
+
+function setStat(index, value, subText=null) {
+  const cards = document.querySelectorAll('.stat-card');
+  if (!cards[index]) return;
+  const val = cards[index].querySelector('.stat-value');
+  const sub = cards[index].querySelector('.stat-sub');
+  if (val) val.textContent = value;
+  if (sub && subText !== null) sub.textContent = subText;
+}
+
+function renderDistribution(counts) {
+  const total = Object.values(counts).reduce((a,b)=>a+b,0) || 1;
+  const distContainer = document.getElementById('distBars');
+  distContainer.innerHTML = '';
+
+  Object.entries(counts)
+    .sort((a,b)=>b[1]-a[1])
+    .forEach(([name,count]) => {
+      const pct = Math.round((count / total) * 100);
+      const col = CAT_COLORS[name] || CAT_COLORS.Inconnue;
+      distContainer.innerHTML += `<div class="dist-bar-item">
+        <span class="dist-label">${name}</span>
+        <div class="dist-track"><div class="dist-fill" style="width:${pct}%;background:${col.dot}"></div></div>
+        <span class="dist-pct">${pct}%</span>
+      </div>`;
+    });
+}
+
+function fallbackDistribution() {
+  renderDistribution({Papier:27, Plastique:26, Verre:25, Métal:22});
+}
+
+function createOrUpdatePcaChart(rows) {
+  const canvas = document.getElementById('pcaChart');
+  if (!canvas || typeof Chart === 'undefined') return;
+
+  const sample = rows.length > 1800 ? rows.filter((_,i)=>i % Math.ceil(rows.length/1800) === 0) : rows;
+  const grouped = {};
+
+  sample.forEach(r => {
+    const cluster = Number.isFinite(Number(r.cluster)) ? `Cluster ${r.cluster}` : 'Cluster ?';
+    if (!grouped[cluster]) grouped[cluster] = [];
+    grouped[cluster].push({
+      x: Number(r.pca1),
+      y: Number(r.pca2),
+      categorie: r.Categorie || 'Inconnue',
+      cluster: r.cluster
+    });
+  });
+
+  const datasets = Object.entries(grouped).map(([label, data], i) => ({
+    label,
+    data,
+    backgroundColor: CLUSTER_COLORS[i % CLUSTER_COLORS.length] + 'CC',
+    borderColor: CLUSTER_COLORS[i % CLUSTER_COLORS.length],
+    borderWidth: 1,
+    pointRadius: 4,
+    pointHoverRadius: 6,
+  }));
+
+  const config = {
+    type:'scatter',
+    data:{datasets},
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      plugins:{
+        legend:{display:true,position:'bottom',labels:{font:{size:10,family:'DM Sans'},boxWidth:10,padding:8}},
+        tooltip:{callbacks:{label:(ctx)=>`${ctx.dataset.label} · ${ctx.raw.categorie} : (${ctx.raw.x.toFixed(2)}, ${ctx.raw.y.toFixed(2)})`}}
+      },
+      scales:{
+        x:{title:{display:true,text:'PC1',font:{size:10}},ticks:{font:{size:9}}},
+        y:{title:{display:true,text:'PC2',font:{size:10}},ticks:{font:{size:9}}},
+      }
+    }
+  };
+
+  if (pcaChart) pcaChart.destroy();
+  pcaChart = new Chart(canvas, config);
+}
+
+function createStaticPcaChart() {
+  const pcaSeeds = {
+    "Papier":    [[-0.5,-0.3],[-0.3,-0.6],[-0.8,-0.1],[-0.2,-0.5],[-0.6,0.1],[-0.9,-0.4],[-0.4,0.2]],
+    "Plastique": [[0.8,1.2],[1.1,0.9],[0.6,1.5],[1.3,1.1],[0.9,0.7],[1.5,1.3],[0.7,1.0]],
+    "Verre":     [[0.2,-1.1],[0.5,-0.8],[-0.1,-1.4],[0.4,-0.6],[0.7,-1.2],[-0.2,-0.9],[0.3,-1.5]],
+    "Métal":     [[-1.2,0.5],[-0.9,0.8],[-1.5,0.3],[-1.1,1.0],[-0.7,0.6],[-1.3,0.2],[-0.8,0.9]],
+  };
+  const rows = [];
+  Object.entries(pcaSeeds).forEach(([cat, pts], ci) => {
+    pts.forEach(([pca1,pca2], i) => rows.push({pca1,pca2,Categorie:cat,cluster:ci,id:i}));
+  });
+  createOrUpdatePcaChart(rows);
+}
+
+function corr(x, y) {
+  const pairs = x.map((v,i)=>[Number(v), Number(y[i])]).filter(([a,b])=>Number.isFinite(a)&&Number.isFinite(b));
+  if (pairs.length < 3) return 0;
+  const xs = pairs.map(p=>p[0]), ys = pairs.map(p=>p[1]);
+  const mx = xs.reduce((a,b)=>a+b,0)/xs.length;
+  const my = ys.reduce((a,b)=>a+b,0)/ys.length;
+  let num=0, dx=0, dy=0;
+  for (let i=0;i<xs.length;i++) {
+    const vx = xs[i]-mx, vy = ys[i]-my;
+    num += vx*vy; dx += vx*vx; dy += vy*vy;
+  }
+  return dx && dy ? Math.abs(num / Math.sqrt(dx*dy)) : 0;
+}
+
+function createOrUpdateRadarChart(rows=[]) {
+  const canvas = document.getElementById('radarChart');
+  if (!canvas || typeof Chart === 'undefined') return;
+
+  let data = [0.78,0.65,0.91,0.58,0.82];
+  if (rows.length && rows[0].Prix_Revente !== undefined) {
+    const y = rows.map(r=>r.Prix_Revente);
+    data = ['Poids','Volume','Conductivite','Opacite','Rigidite'].map(c => Number(corr(rows.map(r=>r[c]), y).toFixed(2)));
+  }
+
+  if (radarChart) radarChart.destroy();
+  radarChart = new Chart(canvas, {
+    type:'radar',
+    data:{
+      labels:['Poids','Volume','Conduct.','Opacité','Rigidité'],
+      datasets:[{data,
+        backgroundColor:'rgba(29,158,117,0.15)',borderColor:'#1D9E75',
+        borderWidth:1.5,pointRadius:3,pointBackgroundColor:'#1D9E75'}]
+    },
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{r:{min:0,max:1,ticks:{font:{size:9},stepSize:.25},grid:{color:'rgba(0,0,0,0.08)'}}}
+    }
+  });
+}
+
+async function loadDashboardClusters() {
+  try {
+    const res = await apiRequest('/dashboard/clusters');
+    const rows = res.data || [];
+    const distribution = res.distribution || rows.reduce((acc,r)=>{
+      const c = r.Categorie || 'Inconnue';
+      acc[c] = (acc[c] || 0) + 1;
+      return acc;
+    }, {});
+
+    setStat(0, (res.n_rows || rows.length).toLocaleString('fr-FR'), 'dataset chargé depuis API');
+    setStat(1, Object.keys(distribution).length.toString(), 'catégories dans dataset');
+    renderDistribution(distribution);
+    createOrUpdatePcaChart(rows);
+    createOrUpdateRadarChart(rows);
+    setBadgeStatus(true);
+  } catch (e) {
+    console.warn('Dashboard API indisponible:', e);
+    fallbackDistribution();
+    createStaticPcaChart();
+    createOrUpdateRadarChart([]);
+    setBadgeStatus(false);
+  }
+}
+
+/* =======================================================
+   ÉTAT DES SLIDERS — valeurs envoyées au backend
+======================================================= */
+const sliderState = {
+  Poids: 39,
+  Volume: 88,
+  Conductivite: 0.000,
+  Opacite: 0.55,
+  Rigidite: 5,
+};
+
+function updateSlider(key, rawValue, displayValue) {
+  sliderState[key] = parseFloat(rawValue);
+  document.getElementById('val-' + key).textContent = displayValue;
+  clearTimeout(predTimeout);
+  predTimeout = setTimeout(triggerPrediction, 300);
+}
+
+function buildPayload() {
+  return {
+    Poids:        sliderState.Poids,
+    Volume:       sliderState.Volume,
+    Conductivite: sliderState.Conductivite,
+    Opacite:      sliderState.Opacite,
+    Rigidite:     sliderState.Rigidite,
+    Source:       document.getElementById('sourceSelect').value,
+  };
+}
+
+function simulateClassification(p) {
+  const {Poids, Conductivite, Opacite, Rigidite} = p;
+  if (Conductivite > 0.5) return "Métal";
+  if (Opacite < 1.0 && Rigidite >= 7 && Conductivite < 0.1) return "Verre";
+  if (Rigidite <= 4 && Conductivite < 0.1 && Poids < 100) return "Plastique";
+  if (Opacite >= 0.3 && Conductivite < 0.1) return "Papier";
+  return "Plastique";
+}
+
+function simulateRegression(p, cat) {
+  const {Poids, Volume, Conductivite, Opacite, Rigidite} = p;
+  const catBase = {Métal:5.8, Verre:4.5, Papier:3.2, Plastique:2.8};
+  const base = (catBase[cat] || 4.0) + Poids*0.005 + Volume*0.002 + Conductivite*3.0 + Opacite*0.05 + Rigidite*0.15;
+  return Math.max(0.10, parseFloat(base.toFixed(3)));
+}
+
+async function triggerPrediction() {
+  const payload = buildPayload();
+  document.getElementById('payload-display').textContent = JSON.stringify(payload, null, 2);
+
+  let cat = null;
+  let prix = null;
+
+  if (USE_REAL_API) {
+    try {
+      const r = await postAPI('/predict/classification', payload);
+      cat = r.categorie_predite;
+      document.getElementById('clf-status').textContent = '✓ API classification connectée';
+    } catch(e) {
+      cat = simulateClassification(payload);
+      document.getElementById('clf-status').textContent = '✗ API classification indisponible — simulation';
+      console.warn(e);
+    }
+
+    try {
+      const r = await postAPI('/predict/regression', {...payload, Categorie: cat});
+      prix = Number(r.prix_revente_predit);
+      document.getElementById('reg-status').textContent = '✓ API régression connectée';
+    } catch(e) {
+      prix = simulateRegression(payload, cat);
+      document.getElementById('reg-status').textContent = '✗ API régression indisponible — simulation';
+      console.warn(e);
+    }
+  } else {
+    cat  = simulateClassification(payload);
+    prix = simulateRegression(payload, cat);
+    document.getElementById('clf-status').textContent = 'Simulation locale';
+    document.getElementById('reg-status').textContent = 'Simulation locale';
+  }
+
+  const col = CAT_COLORS[cat] || CAT_COLORS.Inconnue;
+  document.getElementById('pred-categorie').textContent = cat || '—';
+  document.getElementById('cat-badge-text').textContent = cat || '—';
+  const badge = document.getElementById('cat-badge');
+  const card  = document.getElementById('clf-card');
+  badge.style.background = col.bg;
+  badge.style.color = col.text;
+  badge.querySelector('.category-dot').style.background = col.dot;
+  card.style.background = col.bg;
+  card.style.borderColor = col.border;
+  document.getElementById('pred-price').textContent = Number.isFinite(prix) ? prix.toFixed(3) + ' DT' : '—';
+}
+
+/* ===== NLP ===== */
+function setExample(el) {
+  document.getElementById('nlpInput').value = el.textContent;
+}
+function cleanText(t) {
+  return t.toLowerCase().replace(/[^a-zàâçéèêëîïôûùüÿñæœ0-9\s]/g,' ').replace(/\s+/g,' ').trim();
+}
+function keywordNlpPrediction(text) {
+  const t = cleanText(text);
+  const metal    = ["metal","métal","metallique","métallique","aluminium","canette","conserve","conducteur","objet lourd conducteur","emballage industriel","oxyde","oxydé"];
+  const papier   = ["papier","carton","feuille","journal","livre","imprime","imprimé","bureau","fibreux","administration","support leger","support léger","lecture","colis"];
+  const verre    = ["verre","bocal","vitre","fragile","transparent","bris de verre","bouteille cassee","bouteille cassée","recipient lourd","récipient lourd","confiture","cassante"];
+  const plastique= ["plastique","polymere","polymère","pet","pvc","bouteille legere","bouteille légère","compressible","souple","emballage alimentaire","cosmetique","cosmétique"];
+  if (metal.some(w=>t.includes(w))) return {cat:"Métal", methode:"keywords fallback"};
+  if (papier.some(w=>t.includes(w))) return {cat:"Papier", methode:"keywords fallback"};
+  if (verre.some(w=>t.includes(w))) return {cat:"Verre", methode:"keywords fallback"};
+  if (plastique.some(w=>t.includes(w))) return {cat:"Plastique", methode:"keywords fallback"};
+  return {cat:"Plastique", methode:"fallback local"};
+}
+
+async function runNLP() {
+  const texte = document.getElementById('nlpInput').value.trim();
+  if (!texte) return;
+
+  document.getElementById('nlpBtn').disabled = true;
+  document.getElementById('nlpResult').classList.remove('visible');
+  document.getElementById('nlpSpinner').classList.add('active');
+
+  let cat, methode, conf;
+  try {
+    const res = await postAPI('/predict/nlp', {texte});
+    cat = res.categorie_predite;
+    methode = res.methode || 'API NLP';
+    conf = methode === 'keywords' ? 95 : 82;
+  } catch(e) {
+    const kw = keywordNlpPrediction(texte);
+    cat = kw.cat;
+    methode = kw.methode + ' — API indisponible';
+    conf = 65;
+    console.warn(e);
+  }
+
+  const col = CAT_COLORS[cat] || CAT_COLORS.Inconnue;
+  document.getElementById('nlp-cat-name').textContent = cat;
+  const nb = document.getElementById('nlp-cat-badge');
+  nb.textContent = cat;
+  nb.style.background = col.bg;
+  nb.style.color = col.text;
+  document.getElementById('nlp-conf-pct').textContent = conf + '%';
+  document.getElementById('nlp-conf-bar').style.width = conf + '%';
+  document.getElementById('nlp-texte-echo').textContent = texte.length > 80 ? texte.slice(0,80) + '…' : texte;
+  document.getElementById('nlp-methode-echo').textContent = 'méthode : ' + methode;
+  document.getElementById('nlpResult').classList.add('visible');
+
+  nlpHistory.unshift({texte,cat,col});
+  if (nlpHistory.length > 5) nlpHistory.pop();
+  document.getElementById('historyCard').style.display = 'block';
+  document.getElementById('histCount').textContent = '(' + nlpHistory.length + ')';
+  document.getElementById('historyList').innerHTML = nlpHistory.map(h => `
+    <div class="history-item">
+      <span class="history-text">${h.texte}</span>
+      <span class="history-tag" style="background:${h.col.bg};color:${h.col.text}">${h.cat}</span>
+    </div>`).join('');
+
+  document.getElementById('nlpSpinner').classList.remove('active');
+  document.getElementById('nlpBtn').disabled = false;
+}
+
+document.getElementById('nlpInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    runNLP();
+  }
+});
+
+loadDashboardClusters();
+triggerPrediction();
+</script>

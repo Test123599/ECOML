@@ -225,9 +225,23 @@ def train_regression(df: pd.DataFrame):
     return model
 
 
+def clean_text(text):
+    import re
+
+    text = str(text).lower()
+    text = re.sub(r"[^a-zàâçéèêëîïôûùüÿñæœ0-9\s]", " ", text)
+    text = re.sub(r"\s+", " ", text).strip()
+    return text
+
+
 def train_nlp(df: pd.DataFrame):
-    X = df["Rapport_Collecte"].fillna("texte non disponible")
-    y = df["Categorie"]
+    df_nlp = df[["Rapport_Collecte", "Categorie"]].dropna().copy()
+
+    # nettoyage texte
+    df_nlp["Rapport_Collecte"] = df_nlp["Rapport_Collecte"].apply(clean_text)
+
+    X = df_nlp["Rapport_Collecte"]
+    y = df_nlp["Categorie"]
 
     X_train, X_test, y_train, y_test = train_test_split(
         X,
@@ -243,30 +257,37 @@ def train_nlp(df: pd.DataFrame):
                 "tfidf",
                 TfidfVectorizer(
                     lowercase=True,
-                    stop_words=None,
-                    ngram_range=(1, 2),
-                    max_features=5000,
+                    ngram_range=(1, 3),
+                    max_features=10000,
+                    min_df=1,
+                    sublinear_tf=True,
                 ),
             ),
-            ("model", LinearSVC()),
+            (
+                "model",
+                LinearSVC(
+                    class_weight="balanced",
+                    random_state=42,
+                ),
+            ),
         ]
     )
 
     mlflow.set_experiment("EcoSmart_NLP")
 
-    with mlflow.start_run(run_name="TFIDF_LinearSVC"):
+    with mlflow.start_run(run_name="TFIDF_LinearSVC_Improved"):
         model.fit(X_train, y_train)
         y_pred = model.predict(X_test)
 
         acc = accuracy_score(y_test, y_pred)
         f1 = f1_score(y_test, y_pred, average="weighted", zero_division=0)
 
-        mlflow.log_param("model_name", "TFIDF_LinearSVC")
+        mlflow.log_param("model_name", "TFIDF_LinearSVC_Improved")
         mlflow.log_metric("accuracy", acc)
         mlflow.log_metric("f1_score", f1)
-        mlflow.sklearn.log_model(model, "TFIDF_LinearSVC")
+        mlflow.sklearn.log_model(model, "TFIDF_LinearSVC_Improved")
 
-        print("\n===== NLP TF-IDF + LinearSVC =====")
+        print("\n===== NLP TF-IDF + LinearSVC Improved =====")
         print("Accuracy :", acc)
         print("F1-score :", f1)
 
@@ -274,7 +295,6 @@ def train_nlp(df: pd.DataFrame):
     print("Sauvegardé :", NLP_MODEL_PATH)
 
     return model
-
 
 def train_all():
     os.makedirs(MODELS_DIR, exist_ok=True)
