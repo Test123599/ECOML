@@ -1,0 +1,154 @@
+# API.txt — Eco-Smart Classifier API
+
+# Introduction
+Cette API permet d’interagir avec le système Eco-Smart Classifier.  
+Elle offre des fonctionnalités de classification, régression, analyse NLP, visualisation des clusters et monitoring.
+
+------------------------------------------------------------
+
+# 1. GET /
+
+Description :
+Endpoint de test de l’API.
+
+Rôle :
+- Vérifier que l’API fonctionne correctement
+- Retourner un message de statut
+
+Résultat :
+- Message de confirmation indiquant que l’API est opérationnelle
+
+------------------------------------------------------------
+
+# 2. POST /predict/classification
+
+Description :
+Cet endpoint permet de prédire la catégorie d’un déchet.
+
+Données attendues :
+- Poids
+- Volume
+- Conductivité
+- Opacité
+- Rigidité
+- Source
+
+Fonctionnement :
+- Les données sont transformées en DataFrame
+- Le modèle de classification est appliqué
+- Une catégorie est prédite
+
+Résultat :
+- Catégorie prédite (ex : Plastique, Métal, Verre, Papier)
+
+Utilité :
+- Identifier automatiquement le type de déchet
+
+------------------------------------------------------------
+
+# 3. POST /predict/regression
+
+Description :
+Cet endpoint permet de prédire le prix de revente d’un déchet.
+
+Données attendues :
+- Poids
+- Volume
+- Conductivité
+- Opacité
+- Rigidité
+- Source
+- Catégorie (optionnelle)
+
+Fonctionnement :
+- Si la catégorie est absente, elle est prédite automatiquement via le modèle de classification
+- Le modèle de régression est ensuite appliqué
+- Un prix de revente est calculé
+
+Résultat :
+- Catégorie utilisée
+- Prix de revente prédit
+
+Utilité :
+- Estimer la valeur économique d’un déchet recyclable
+
+------------------------------------------------------------
+
+# 4. POST /predict/nlp
+
+Description :
+Cet endpoint analyse une description textuelle de déchet.
+
+Données attendues :
+- texte (description du déchet)
+
+Fonctionnement :
+- Nettoyage du texte (lowercase, regex)
+- Détection par mots-clés (règles simples)
+- Si aucun mot-clé n’est trouvé :
+  - utilisation du modèle NLP (TF-IDF + LinearSVC)
+
+Résultat :
+- Catégorie prédite
+- Méthode utilisée (keywords ou modèle NLP)
+- Texte nettoyé
+
+Utilité :
+- Classifier un déchet à partir d’une description textuelle
+
+------------------------------------------------------------
+
+# 5. GET /metrics
+
+Description :
+Endpoint de monitoring Prometheus.
+
+Rôle :
+- Exposer les métriques de l’API
+- Suivre le nombre de requêtes
+
+Métriques :
+- api_requests_total
+
+Utilité :
+- Monitoring en temps réel avec Prometheus et Grafana
+
+------------------------------------------------------------
+
+# 6. GET /dashboard/clusters
+
+Description :
+Endpoint de visualisation des clusters.
+
+Fonctionnement :
+- Chargement du dataset
+- Sélection des variables numériques
+- Gestion des valeurs manquantes
+- Standardisation des données
+- Application de KMeans
+- Réduction de dimension avec PCA
+
+Résultat :
+Pour chaque donnée :
+- cluster assigné
+- coordonnées PCA (pca1, pca2)
+- variables originales
+- catégorie
+- prix de revente
+
+Utilité :
+- Visualiser la structure des données
+- Comprendre les groupes de déchets
+
+------------------------------------------------------------
+
+# Conclusion
+
+Cette API permet de :
+- classifier des déchets
+- prédire leur prix de revente
+- analyser du texte (NLP)
+- visualiser des clusters
+- surveiller le système en production
+
+Elle représente le cœur du projet Eco-Smart Classifier dans une architecture MLOps complète.
