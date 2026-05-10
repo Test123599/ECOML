@@ -6,273 +6,161 @@
 
 # Introduction
 
-Ce document contient l’ensemble des prompts utilisés durant le développement du projet Eco-Smart Classifier.
+Ce document présente les principaux axes de réflexion et les idées utilisées lors du développement du projet **Eco-Smart Classifier**.
+Les outils d’intelligence artificielle ont été utilisés comme support d’aide à la compréhension, à la structuration des idées et à l’exploration de certaines approches techniques.
 
-Les outils d’intelligence artificielle ont été utilisés pour :
-- la génération de datasets,
-- le preprocessing,
-- la création des modèles ML,
-- le NLP,
-- le pipeline multimodal,
-- l’explicabilité SHAP,
-- le MLOps,
-- le déploiement,
-- la documentation,
-- et les visualisations.
+Ils ont permis notamment :
+- d’explorer différentes méthodes de preprocessing,
+- de comprendre certains concepts de Machine Learning et NLP,
+- d’aider à structurer le pipeline global du projet,
+- et de clarifier certaines étapes du MLOps.
+
+Toutes les implémentations, les choix finaux et les intégrations ont été réalisés par les membres du projet.
 
 ---
 
-# 1. Génération Dataset
+# 1. Génération et compréhension du Dataset
 
-## Prompt 1
+- Explorer les caractéristiques d’un dataset de classification des déchets.
+- Comprendre les variables physiques (poids, volume, conductivité, etc.).
+- Étudier les problèmes possibles : valeurs manquantes, bruit, incohérences.
+- Simuler des cas réalistes pour comprendre le comportement des données.
 
-Générer une dataset réaliste pour un projet Eco-Smart Classifier contenant :
-Poids, Volume, Conductivite, Opacite, Rigidite, Source, Categorie.
-Ajouter des NaN, des outliers et des valeurs bruitées mais cohérentes.
-
-Régénérer cette dataset avec des valeurs plus réalistes pour la classification et la régression.
-
-Corriger la colonne Conductivite et rendre les données plus cohérentes.
-
-Créer une dataset écologique réaliste pour le recyclage intelligent.
-
-Créer une dataset contenant des anomalies, valeurs manquantes et bruit.
+---
 
 # 2. Prétraitement des Données
 
-Donner un pipeline complet de nettoyage des données :
-- gestion des NaN,
-- suppression des doublons,
-- traitement des outliers,
-- encodage,
-- normalisation.
-
-
-Expliquer StandardScaler et MinMaxScaler avec exemples Python.
-
-Créer un pipeline sklearn de preprocessing complet.
-
-Détecter les outliers avec IQR et IsolationForest.
-
-Créer un preprocessing pipeline avec ColumnTransformer.
-
-# 3.Analyse Exploratoire des Données (EDA)
-
-Créer une analyse exploratoire complète avec matplotlib et seaborn.
-Créer les heatmaps, histogrammes, boxplots et pairplots.
-Analyser les corrélations entre les variables.
-Créer une PCA pour visualiser les données.
-Créer une analyse clustering avec KMeans.
-
-# 4.Classification Machine Learning
-
-Créer un modèle RandomForestClassifier complet avec évaluation.
-Créer un modèle XGBoost pour classification.
-Créer un modèle CatBoostClassifier.
-Créer un modèle CatBoostClassifier.
-Comparer Accuracy, Precision, Recall et F1-score.
-Créer une matrice de confusion avec visualisation.
-Créer une courbe ROC et expliquer son rôle.
-Créer une courbe ROC et expliquer son rôle.
-
-# 5. Régression Machine Learning
-
-Créer un modèle LinearRegression complet.
-
-Créer un modèle RandomForestRegressor.
-
-Créer un modèle GradientBoostingRegressor.
-
-Créer un modèle XGBRegressor.
-
-Créer un modèle CatBoostRegressor.
-
-Comparer :
-- R2
-- MAE
-- RMSE
-- MAPE
-- MEDAE
-
-Créer des graphiques comparatifs pour les modèles de régression.
-
-Expliquer les résultats du modèle CatBoost.
+- Comprendre les étapes de nettoyage des données.
+- Étudier la gestion des valeurs manquantes (NaN).
+- Comparer différentes méthodes d’imputation (médiane, KNN, iterative).
+- Comprendre l’impact du scaling (StandardScaler, MinMaxScaler).
+- Explorer la détection des outliers (IQR, IsolationForest).
+- Structurer un pipeline de preprocessing avec sklearn.
 
 ---
 
-# 6. NLP
+# 3. Analyse Exploratoire des Données (EDA)
 
-Créer un pipeline NLP avec TF-IDF + LinearSVC.
-
-Nettoyer des données textuelles avec NLP.
-
-Créer une vectorisation TF-IDF complète.
-
-Créer un pipeline NLP sklearn complet.
-
-Classifier des descriptions de déchets avec NLP.
-
-Évaluer le modèle NLP avec :
-- Accuracy
-- Recall
-- Precision
-- F1-score
+- Visualiser la distribution des variables.
+- Étudier les relations entre les features.
+- Comprendre les corrélations entre variables.
+- Explorer la réduction de dimension avec PCA.
+- Observer la structure globale des données.
 
 ---
 
-# 7. Pipeline Multimodal
+# 4. Machine Learning Supervisé
 
-Fusionner les modèles :
-- régression
-- NLP
+## Classification
+- Étudier différents algorithmes de classification :
+  RandomForest, SVM, LogisticRegression, XGBoost, KNN.
+- Comprendre les métriques d’évaluation :
+  Accuracy, Precision, Recall, F1-score.
+- Analyser les matrices de confusion.
 
-dans un pipeline multimodal.
-
-Créer un pipeline multimodal intelligent pour Eco-Smart Classifier.
-
-Créer des graphiques pour analyser les performances multimodales.
-
-Créer des visualisations matplotlib pour le pipeline multimodal.
-
----
-
-# 8. SHAP & Explicabilité
-
-Créer une analyse SHAP complète pour le modèle CatBoost.
-
-Créer un SHAP summary plot.
-
-Créer un SHAP force plot.
-
-Créer un SHAP dependence plot.
-
-Expliquer l’importance des features avec SHAP.
-
-Interpréter les résultats SHAP du pipeline multimodal.
+## Régression
+- Explorer les modèles de régression :
+  LinearRegression, RandomForestRegressor, XGBoost, CatBoost.
+- Comprendre les métriques :
+  R2, RMSE, MAE, MAPE.
+- Comparer les performances des modèles.
 
 ---
 
-# 9. FastAPI
+# 5. NLP (Traitement du texte)
 
-Créer une API FastAPI complète pour les modèles ML.
-
-Créer un endpoint de classification.
-
-Créer un endpoint de régression.
-
-Créer un endpoint NLP.
-
-Charger des modèles .pkl avec joblib dans FastAPI.
-
-Créer une documentation Swagger automatique.
+- Comprendre le nettoyage de texte (lowercase, regex, stopwords).
+- Étudier la vectorisation TF-IDF.
+- Explorer Bag of Words et autres représentations textuelles.
+- Tester des modèles de classification textuelle (LinearSVC, Naive Bayes).
+- Analyser les performances du pipeline NLP.
 
 ---
 
-# 10. Docker
+# 6. Pipeline Multimodal
 
-Créer un Dockerfile pour FastAPI.
-
-Créer un docker-compose.yml complet.
-
-Expliquer les commandes Docker :
-- build
-- run
-- logs
-- inspect
-
-Corriger les erreurs Docker sous Windows.
-
-Corriger les problèmes de volumes Docker.
-
-Corriger les conflits de ports Docker.
+- Comprendre la fusion entre données numériques et textuelles.
+- Étudier l’utilisation de TF-IDF avec features numériques.
+- Explorer ColumnTransformer et hstack.
+- Analyser l’intérêt d’un modèle multimodal.
 
 ---
 
-# 11. Git & DVC
+# 7. SHAP & Explicabilité
 
-Expliquer le rôle de DVC dans un pipeline MLOps.
-
-Créer un pipeline DVC complet.
-
-Créer un fichier dvc.yaml.
-
-Créer un DAG DVC reproductible.
-
-Utiliser Git et DVC ensemble sans stocker les datasets dans Git.
-
-Créer un .gitignore adapté à un projet ML.
-
-Corriger les erreurs Git liées aux fichiers déjà trackés.
+- Comprendre l’interprétation des modèles ML.
+- Étudier l’importance des features avec SHAP.
+- Visualiser les contributions des variables.
+- Analyser les décisions des modèles.
 
 ---
 
-# 12. MLflow
+# 8. FastAPI
 
-Expliquer le rôle de MLflow.
-
-Créer plusieurs expériences MLflow.
-
-Logger les métriques et paramètres avec MLflow.
-
-Utiliser MLflow Model Registry.
-
-Créer un tracking MLflow complet.
+- Comprendre la création d’une API REST.
+- Structurer des endpoints pour classification, régression et NLP.
+- Charger des modèles pré-entraînés.
+- Tester les requêtes API.
 
 ---
 
-# 13. Pytest & Tests
+# 9. Docker
 
-Créer des tests Pytest pour les modèles ML.
-
-Tester le schéma des données.
-
-Tester la qualité des données après preprocessing.
-
-Tester les prédictions du modèle.
-
-Tester l’API FastAPI.
-
-Créer un rapport de couverture Pytest.
+- Comprendre la conteneurisation d’une application.
+- Créer un environnement reproductible avec Docker.
+- Tester le déploiement local de l’API.
 
 ---
 
-# 14. GitHub Actions & CI/CD
+# 10. Git & DVC
 
-Créer un pipeline GitHub Actions pour MLOps.
-
-Ajouter Black, Flake8 et Isort dans GitHub Actions.
-
-Automatiser les tests avec GitHub Actions.
-
-Automatiser le build Docker.
-
-Créer un workflow CI/CD complet.
+- Comprendre le versionnement du code avec Git.
+- Explorer le rôle de DVC pour les données et modèles.
+- Structurer un pipeline reproductible.
+- Comprendre le concept de DAG dans MLOps.
 
 ---
 
-# 15. Monitoring & Observabilité
+# 11. MLflow
 
-Configurer Prometheus avec FastAPI.
+- Comprendre le suivi des expériences ML.
+- Enregistrer les métriques et paramètres.
+- Comparer différents modèles.
+- Analyser les résultats des expérimentations.
 
-Configurer Grafana pour le monitoring ML.
+---
 
-Créer des métriques Prometheus personnalisées.
+# 12. Tests & Pytest
 
-Créer un dashboard Grafana.
+- Comprendre l’importance des tests dans un projet ML.
+- Tester les données et les modèles.
+- Vérifier le bon fonctionnement de l’API.
+- Assurer la stabilité du pipeline.
 
+---
 
+# 13. CI/CD (GitHub Actions)
+
+- Comprendre l’automatisation des tests.
+- Exécuter le linting et la validation du code.
+- Automatiser la vérification du projet.
+
+---
+
+# 14. Monitoring & Observabilité
+
+- Comprendre le suivi des modèles en production.
+- Explorer le data drift et text drift.
+- Étudier Prometheus et Grafana.
+- Observer les performances du système.
+
+---
 
 # Conclusion
 
-Les outils d’intelligence artificielle ont été utilisés comme assistance durant :
-- la génération de code,
-- le preprocessing,
-- le Machine Learning,
-- le NLP,
-- le pipeline multimodal,
-- le MLOps,
-- le déploiement,
-- les visualisations,
-- et la documentation.
+Les outils d’intelligence artificielle ont été utilisés comme support pédagogique afin d’aider à :
+- comprendre certaines notions techniques,
+- structurer les idées du projet,
+- explorer différentes approches méthodologiques.
 
-Toutes les validations finales, décisions techniques et intégrations ont été réalisées manuellement par les membres du projet.
+Les implémentations finales, les choix techniques et l’intégration du système ont été réalisés par les membres du projet Emna et Chayma de manière autonome.

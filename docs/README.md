@@ -246,9 +246,6 @@ Cette étape garantit :
 Elle constitue une base essentielle pour les étapes suivantes :
 Machine Learning, NLP et clustering.
 
-
-
-
 # Module 2 — Machine Learning Supervisé
 
 ## Classification
